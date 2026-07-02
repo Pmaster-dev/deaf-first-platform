@@ -37,7 +37,7 @@ app.post('/api/process/text', (req, res) => {
       result = `[Translated] ${text}`;
       break;
     case 'simplify':
-      result = text.aslGloss();
+      result = text.toLowerCase();
       break;
     default:
       result = text;

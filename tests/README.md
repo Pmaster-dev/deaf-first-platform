@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Testing Documentation
 
 This directory contains automated tests for the MBTQ.dev's open source deaf-first platform APIs.
