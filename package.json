@@ -1,3 +1,4 @@
+{
   "name": "deaf-first",
   "version": "2.0.0",
   "private": true,
@@ -7,38 +8,42 @@
   "workspaces": [
     "frontend",
     "backend",
-    "services/deafauth",
-    "services/pinksync",
-    "services/fibonrose",
-    "services/accessibility-nodes",
+    "Services/deafauth",
+    "Services/pinksync",
+    "Services/fibonrose",
+    "Services/accessibility-nodes",
     "ai"
   ],
   "scripts": {
     "dev": "concurrently -n \"FRONT,BACK,DEAF,PINK,FIBR,A11Y\" -c \"cyan,magenta,yellow,green,blue,red\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:deafauth\" \"npm run dev:pinksync\" \"npm run dev:fibonrose\" \"npm run dev:a11y\"",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
-    "dev:deafauth": "npm run dev --workspace=services/deafauth",
-    "dev:pinksync": "npm run dev --workspace=services/pinksync",
-    "dev:fibonrose": "npm run dev --workspace=services/fibonrose",
-    "dev:a11y": "npm run dev --workspace=services/accessibility-nodes",
+    "dev:deafauth": "npm run dev --workspace=@deaf-first/deafauth",
+    "dev:pinksync": "npm run dev --workspace=@deaf-first/pinksync",
+    "dev:fibonrose": "npm run dev --workspace=@deaf-first/fibonrose",
+    "dev:a11y": "npm run dev --workspace=@deaf-first/accessibility-nodes",
     "build": "npm run build --workspaces --if-present",
     "build:docker": "docker-compose -f configs/deployment/docker-compose.yml build",
     "deploy": "npm run deploy --workspaces --if-present",
     "docker:up": "docker-compose -f configs/deployment/docker-compose.yml up -d",
     "docker:down": "docker-compose -f configs/deployment/docker-compose.yml down",
     "docker:logs": "docker-compose -f configs/deployment/docker-compose.yml logs -f",
-    "db:setup": "npm run db:setup --workspace=backend && npm run db:setup --workspace=services/deafauth",
+    "db:setup": "npm run db:setup --workspace=backend && npm run db:setup --workspace=@deaf-first/deafauth",
     "db:migrate": "npm run db:migrate --workspaces --if-present",
     "db:seed": "npm run db:seed --workspaces --if-present",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "npm run test:e2e --workspace=frontend",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present && npm run validate:openapi",
     "lint-staged": "lint-staged",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "type-check": "npm run type-check --workspaces --if-present",
+    "validate:openapi": "node scripts/validate-openapi.js",
+    "generate:sdk": "npm run generate:sdk:typescript && npm run generate:sdk:python",
+    "generate:sdk:typescript": "node scripts/generate-sdk.js typescript",
+    "generate:sdk:python": "node scripts/generate-sdk.js python",
     "prepare": "husky install",
     "clean": "rm -rf node_modules && npm run clean --workspaces --if-present"
   },
@@ -49,6 +54,7 @@
     "axios": "^1.6.0",
     "concurrently": "^9.1.0",
     "husky": "^9.0.11",
+    "jest": "^29.7.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
@@ -74,40 +80,3 @@
     "mcp-server"
   ]
 }
-=======
-{
-  "name": "mbtq-deaf-first-platform",
-  "version": "1.0.0",
-  "description": "MBTQ Universe deaf-first platform with OpenAPI specifications",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "validate:openapi": "node scripts/validate-openapi.js",
-    "generate:sdk": "npm run generate:sdk:typescript && npm run generate:sdk:python",
-    "generate:sdk:typescript": "node scripts/generate-sdk.js typescript",
-    "generate:sdk:python": "node scripts/generate-sdk.js python",
-    "lint": "eslint .",
-    "format": "prettier --write ."
-  },
-  "keywords": [
-    "deaf-first",
-    "accessibility",
-    "openapi",
-    "api",
-    "mbtq"
-  ],
-  "author": "MBTQ Universe",
-  "license": "MIT",
-  "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.1.0",
-    "@openapitools/openapi-generator-cli": "^2.13.4",
-    "axios": "^1.6.0",
-    "eslint": "^8.57.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.2.5",
-    "yaml": "^2.3.4"
-  }
-}
->>>>>>> e961430... Add Node.js API automated tests and SDK generation capabilities

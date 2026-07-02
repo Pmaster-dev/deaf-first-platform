@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import webhookRoutes from './routes/webhook.routes';
-import incomingWebhookRoutes from './routes/incoming-webhook.routes';
+import webhookRoutes from './routes/webhook.routes.js';
+import incomingWebhookRoutes from './routes/incoming-webhook.routes.js';
 
 dotenv.config();
 

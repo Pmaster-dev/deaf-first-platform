@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.AI_PORT || ${PORT};
+const PORT = Number(process.env.AI_PORT) || 3006;
 
 // Note: This is a mock implementation for development.
 // In production, integrate with actual AI services like OpenAI API.
