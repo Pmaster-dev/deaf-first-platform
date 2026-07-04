@@ -60,6 +60,7 @@ async function validateAllSpecs() {
       results.push(result);
     } else {
       console.log(`\n⚠️  ${service}: No OpenAPI spec found`);
+      results.push({ valid: true, skipped: true, serviceName: service, pathCount: 0, endpointCount: 0 });
     }
   }
 
@@ -68,7 +69,7 @@ async function validateAllSpecs() {
   const validCount = results.filter((r) => r.valid).length;
   const totalEndpoints = results
     .filter((r) => r.valid)
-    .reduce((sum, r) => sum + r.endpointCount, 0);
+    .reduce((sum, r) => sum + (r.endpointCount ?? 0), 0);
 
   console.log(`\n📊 Summary:`);
   console.log(`   Services validated: ${results.length}`);
