@@ -51,6 +51,7 @@ async function validateAllSpecs() {
   });
 
   const results = [];
+  let missingCount = 0;
 
   for (const service of services) {
     const specPath = path.join(SERVICES_DIR, service, 'openapi', 'openapi.yaml');
@@ -59,6 +60,7 @@ async function validateAllSpecs() {
       const result = await validateOpenAPISpec(service, specPath);
       results.push(result);
     } else {
+      missingCount += 1;
       console.log(`\n⚠️  ${service}: No OpenAPI spec found`);
       results.push({ valid: true, skipped: true, serviceName: service, pathCount: 0, endpointCount: 0 });
     }
@@ -72,8 +74,10 @@ async function validateAllSpecs() {
     .reduce((sum, r) => sum + (r.endpointCount ?? 0), 0);
 
   console.log(`\n📊 Summary:`);
+  console.log(`   Services scanned: ${services.length}`);
   console.log(`   Services validated: ${results.length}`);
   console.log(`   Valid specifications: ${validCount}`);
+  console.log(`   Missing specifications: ${missingCount}`);
   console.log(`   Total endpoints: ${totalEndpoints}`);
 
   if (validCount === results.length) {

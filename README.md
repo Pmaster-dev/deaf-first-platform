@@ -12,42 +12,41 @@ This repository contains OpenAPI specifications for all five core services of th
 ### 1. **DeafAUTH - Identity Cortex**
 Secure authentication system designed with deaf-first principles.
 
-- **Location**: `services/deafauth/`
+- **Location**: `Services/deafauth/`
 - **Base URL**: `https://api.mbtq.dev/auth` auth.mbtq.dev
-- **Documentation**: [DeafAUTH README](services/deafauth/README.md)
-- **OpenAPI Spec**: [openapi.yaml](services/deafauth/openapi/openapi.yaml)
+- **Documentation**: [DeafAUTH README](Services/deafauth/README.md)
+- **OpenAPI Spec**: [openapi.yaml](Services/deafauth/openapi/openapi.yaml)
 
 ### 2. **PinkSync - Accessibility Engine**
 Real-time accessibility features and synchronization.
 
-- **Location**: `services/pinksync/`
+- **Location**: `Services/pinksync/`
 - **Base URL**: `https://api.mbtq.dev/sync`sync.mbtq.dev
-- **Documentation**: [PinkSync README](services/pinksync/README.md)
-- **OpenAPI Spec**: [openapi.yaml](services/pinksync/openapi/openapi.yaml)
+- **Documentation**: [PinkSync README](Services/pinksync/README.md)
+- **OpenAPI Spec**: [openapi.yaml](Services/pinksync/openapi/openapi.yaml)
 
 ### 3. **Fibonrose - Trust & Blockchain**
 Decentralized trust and verification layer.
 
-- **Location**: `services/fibonrose/`
+- **Location**: `Services/fibonrose/`
 - **Base URL**: `https://api.mbtq.dev/trust` trust.mbtq.dev
-- **Documentation**: [Fibonrose README](services/fibonrose/README.md)
-- **OpenAPI Spec**: [openapi.yaml](services/fibonrose/openapi/openapi.yaml)
+- **Documentation**: [Fibonrose README](Services/fibonrose/README.md)
+- **OpenAPI Spec**: [openapi.yaml](Services/fibonrose/openapi/openapi.yaml)
 
 ### 4. **360Magicians - AI Agents**
 Intelligent automation and assistance agents.
-===
-- **Location**: `services/magicians/`
+- **Location**: `Services/magicians/`
 - **Base URL**: `https://api.mbtq.dev/magicians` magicians.mbtq.dev
-- **Documentation**: [360Magicians README](services/magicians/README.md)
-- **OpenAPI Spec**: [openapi.yaml](services/magicians/openapi/openapi.yaml)
+- **Documentation**: [360Magicians README](Services/magicians/README.md)
+- **OpenAPI Spec**: [openapi.yaml](Services/magicians/openapi/openapi.yaml)
 
 ### 5. **MBTQ DAO - Governance**
 Decentralized governance and community management.
 
-- **Location**: `services/dao/`
+- **Location**: `Services/dao/`
 - **Base URL**: `https://api.mbtq.dev/dao`
-- **Documentation**: [DAO README](services/dao/README.md)
-- **OpenAPI Spec**: [openapi.yaml](services/dao/openapi/openapi.yaml)
+- **Documentation**: [DAO README](Services/dao/README.md)
+- **OpenAPI Spec**: [openapi.yaml](Services/dao/openapi/openapi.yaml)
 
 ## 🚀 Features
 
@@ -130,7 +129,7 @@ curl -X GET https://api.mbtq.dev/sync/status \
 ### Fibonrose Endpoints
 
 - `POST /trust/blockchain/verify` - Verify blockchain transaction
-- `GET /trust//trust-score` - Get trust score
+- `GET /trust/trust-score` - Get trust score
 - `POST /trust/blockchain/record` - Record new transaction
 
 ### 360Magicians Endpoints
@@ -145,7 +144,7 @@ Comprehensive AI agent platform with 60+ endpoints including:
 - Scheduling and webhooks
 - Analytics and cost tracking
 
-See [360Magicians README](services/magicians/README.md) for complete endpoint list.
+See [360Magicians README](Services/magicians/README.md) for complete endpoint list.
 
 ### DAO Endpoints
 

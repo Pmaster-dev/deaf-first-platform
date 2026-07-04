@@ -177,7 +177,7 @@ These tests are designed to run in CI/CD pipelines:
 
 ## Integration with OpenAPI
 
-The tests are designed to match the OpenAPI specifications in `services/*/openapi/openapi.yaml`. When the specs change, update the corresponding tests.
+The tests are designed to match the OpenAPI specifications in `Services/*/openapi/openapi.yaml`. When the specs change, update the corresponding tests.
 
 ## Validation Scripts
 
