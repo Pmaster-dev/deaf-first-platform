@@ -5,9 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const yaml = require('yaml');
 const SwaggerParser = require('@apidevtools/swagger-parser');
-
 const SERVICES_DIR = path.join(__dirname, '..', 'Services');
 
 async function validateOpenAPISpec(serviceName, specPath) {
