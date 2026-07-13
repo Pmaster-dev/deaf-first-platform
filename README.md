@@ -549,13 +549,12 @@ The platform includes Model Context Protocol (MCP) server support in several ser
 - **AI Services**: AI-powered workflows
 
 To run MCP servers individually:
-```bash
-npm run mcp --workspace=services/deafauth
-npm run mcp --workspace=services/pinksync
-npm run mcp --workspace=services/fibonrose
-npm run mcp --workspace=services/accessibility-nodes
-npm run mcp --workspace=ai
-```
+
+    npm run mcp --workspace=@deaf-first/deafauth
+    npm run mcp --workspace=@deaf-first/pinksync
+    npm run mcp --workspace=@deaf-first/fibonrose
+    npm run mcp --workspace=@deaf-first/accessibility-nodes
+    npm run mcp --workspace=@deaf-first/ai
 
 ## Workspaces
 
