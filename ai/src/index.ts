@@ -27,7 +27,11 @@ app.get('/health', (req, res) => {
 // AI processing endpoints
 app.post('/api/process/text', (req, res) => {
   const { text, operation } = req.body;
-  
+
+  if (typeof text !== 'string') {
+    return res.status(400).json({ success: false, error: 'Invalid request', message: '`text` must be a string' });
+  }
+
   let result = '';
   switch (operation) {
     case 'summarize':
@@ -39,6 +43,18 @@ app.post('/api/process/text', (req, res) => {
     case 'simplify':
       result = text.toLowerCase();
       break;
+    default:
+      result = text;
+  }
+
+  res.json({
+    success: true,
+    operation,
+    originalText: text,
+    result,
+    confidence: 0.95,
+  });
+});
     default:
       result = text;
   }
