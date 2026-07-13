@@ -19,7 +19,7 @@ async function validateOpenAPISpec(serviceName, specPath) {
     const pathCount = Object.keys(api.paths || {}).length;
     let endpointCount = 0;
 
-    for (const path in api.paths) {
+    for (const path in api.paths || {}) {
       const methods = api.paths[path];
       endpointCount += Object.keys(methods).filter((m) =>
         ['get', 'post', 'put', 'patch', 'delete'].includes(m)
