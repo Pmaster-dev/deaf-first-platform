@@ -81,7 +81,7 @@ npm run docs:serve        # Serve docs at http://localhost:3000
 
 ## 🔐 Authentication
 
-All MBTQ Universe services use DeafAUTH for authentication. Include the Bearer token in the Authorization header:
+All MBTQ.dev services use DeafAUTH for authentication. Include the Bearer token in the Authorization header:
 
 ```bash
 Authorization: Bearer <your_token>
