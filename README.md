@@ -19,9 +19,8 @@ Secure authentication system designed with deaf-first principles.
 
 ### 2. **PinkSync - Accessibility Engine**
 Real-time accessibility features and synchronization.
-
 - **Location**: `Services/pinksync/`
-- **Base URL**: `https://api.mbtq.dev/sync`sync.mbtq.dev
+- **Base URL**: `https://api.mbtq.dev/sync` (sync.mbtq.dev)
 - **Documentation**: [PinkSync README](Services/pinksync/README.md)
 - **OpenAPI Spec**: [openapi.yaml](Services/pinksync/openapi/openapi.yaml)
 
