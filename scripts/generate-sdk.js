@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const SERVICES_DIR = path.join(__dirname, '..', 'Services');
 const SDK_OUTPUT_DIR = path.join(__dirname, '..', 'sdks');
@@ -52,19 +52,24 @@ function generateSDK(service, specPath, language) {
     .join(',');
   
   try {
-    // Use openapi-generator-cli
-    const command = [
-      'npx',
+    // Use openapi-generator-cli without invoking a shell
+    const args = [
       '@openapitools/openapi-generator-cli',
       'generate',
-      `-i ${specPath}`,
-      `-g ${config.generator}`,
-      `-o ${outputDir}`,
+      '-i',
+      specPath,
+      '-g',
+      config.generator,
+      '-o',
+      outputDir,
       `--additional-properties=${additionalProps}`,
       '--skip-validate-spec' // We already validated
-    ].join(' ');
-    
-    execSync(command, { stdio: 'inherit' });
+    ];
+
+    const result = spawnSync('npx', args, { stdio: 'inherit' });
+    if (result.status !== 0) {
+      throw new Error(`openapi-generator-cli exited with status ${result.status}`);
+    }
     
     console.log(`   ✅ ${language} SDK generated successfully`);
     console.log(`   📁 Output: ${outputDir}`);
