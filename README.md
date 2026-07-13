@@ -342,7 +342,7 @@ Generate interactive API documentation:
 ```bash
 # TypeScript SDK
 openapi-generator-cli generate \
-  -i services/deafauth/openapi/openapi.yaml \
+  -i Services/deafauth/openapi/openapi.yaml \
   -g typescript-axios \
   -o sdks/typescript/deafauth
 
