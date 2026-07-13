@@ -425,14 +425,12 @@ The platform features a modern, cutting-edge showcase interface that demonstrate
 
 ## Architecture
 
-This is a monorepo managed with npm workspaces containing:
-
 - **frontend**: React-based accessible user interface
 - **backend**: Express API server
-- **services/deafauth**: DeafAUTH authentication service with MCP server support
-- **services/pinksync**: Real-time synchronization service
-- **services/fibonrose**: Mathematical optimization engine
-- **services/accessibility-nodes**: Modular accessibility features
+- **Services/deafauth**: DeafAUTH authentication service with MCP server support
+- **Services/pinksync**: Real-time synchronization service
+- **Services/fibonrose**: Mathematical optimization engine
+- **Services/accessibility-nodes**: Modular accessibility features
 - **ai**: AI services for deaf-first workflows
 
 ## Prerequisites
