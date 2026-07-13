@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { WebhookConfig, WebhookEvent, WebhookDelivery } from '../types/webhook.types.js';
+import { WebhookConfig, WebhookDelivery } from '../types/webhook.types.js';
 
 /**
  * In-memory storage for webhooks (in production, use a database)
