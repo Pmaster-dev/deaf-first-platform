@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.AI_PORT || ${PORT};
+const PORT = Number(process.env.AI_PORT) || 3006;
 
 // Note: This is a mock implementation for development.
 // In production, integrate with actual AI services like OpenAI API.
@@ -27,7 +27,11 @@ app.get('/health', (req, res) => {
 // AI processing endpoints
 app.post('/api/process/text', (req, res) => {
   const { text, operation } = req.body;
-  
+
+  if (typeof text !== 'string') {
+    return res.status(400).json({ success: false, error: 'Invalid request', message: '`text` must be a string' });
+  }
+
   let result = '';
   switch (operation) {
     case 'summarize':
@@ -37,8 +41,20 @@ app.post('/api/process/text', (req, res) => {
       result = `[Translated] ${text}`;
       break;
     case 'simplify':
-      result = text.aslGloss();
+      result = text.toLowerCase();
       break;
+    default:
+      result = text;
+  }
+
+  res.json({
+    success: true,
+    operation,
+    originalText: text,
+    result,
+    confidence: 0.95,
+  });
+});
     default:
       result = text;
   }

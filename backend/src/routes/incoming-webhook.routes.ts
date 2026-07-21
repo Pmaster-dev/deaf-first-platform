@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { WebhookEvent } from '../types/webhook.types';
+import { WebhookEvent } from '../types/webhook.types.js';
 
 const router = Router();
 
