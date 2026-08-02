@@ -14,7 +14,7 @@ class WebhookService {
   registerWebhook(name: string, url: string, events: string[], secret?: string): WebhookConfig {
     const id = this.generateId();
     const generatedSecret = secret || this.generateSecret();
-    
+
     const webhook: WebhookConfig = {
       id,
       name,
@@ -165,7 +165,7 @@ class WebhookService {
     if (!hexPattern.test(normalizedSignature) || !hexPattern.test(normalizedExpected)) {
       return false;
     }
-    
+
     // Ensure both signatures have the same length before comparison
     if (normalizedSignature.length !== normalizedExpected.length) {
       return false;

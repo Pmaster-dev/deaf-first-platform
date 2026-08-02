@@ -10,7 +10,7 @@ jest.mock('axios');
 
 describe('DeafAUTH - Identity Cortex API', () => {
   const baseURL = 'https://api.mbtquniverse.com/auth';
-  
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -21,15 +21,15 @@ describe('DeafAUTH - Identity Cortex API', () => {
         data: {
           id: 'user_123',
           email: 'test@example.com',
-          createdAt: '2024-01-01T00:00:00Z'
-        }
+          createdAt: '2024-01-01T00:00:00Z',
+        },
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
       const response = await axios.post(`${baseURL}/register`, {
         email: 'test@example.com',
-        password: 'SecurePass123!'
+        password: 'SecurePass123!',
       });
 
       expect(response.data).toHaveProperty('id');
@@ -39,7 +39,7 @@ describe('DeafAUTH - Identity Cortex API', () => {
         `${baseURL}/register`,
         expect.objectContaining({
           email: 'test@example.com',
-          password: 'SecurePass123!'
+          password: 'SecurePass123!',
         })
       );
     });
@@ -48,19 +48,19 @@ describe('DeafAUTH - Identity Cortex API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 400,
-          data: { error: 'Invalid email format' }
-        }
+          data: { error: 'Invalid email format' },
+        },
       });
 
       await expect(
         axios.post(`${baseURL}/register`, {
           email: 'invalid-email',
-          password: 'SecurePass123!'
+          password: 'SecurePass123!',
         })
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 400
-        })
+          status: 400,
+        }),
       });
     });
   });
@@ -71,15 +71,15 @@ describe('DeafAUTH - Identity Cortex API', () => {
         data: {
           accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
           refreshToken: 'refresh_token_here',
-          expiresIn: 3600
-        }
+          expiresIn: 3600,
+        },
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
       const response = await axios.post(`${baseURL}/login`, {
         email: 'test@example.com',
-        password: 'SecurePass123!'
+        password: 'SecurePass123!',
       });
 
       expect(response.data).toHaveProperty('accessToken');
@@ -92,19 +92,19 @@ describe('DeafAUTH - Identity Cortex API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 401,
-          data: { error: 'Invalid credentials' }
-        }
+          data: { error: 'Invalid credentials' },
+        },
       });
 
       await expect(
         axios.post(`${baseURL}/login`, {
           email: 'test@example.com',
-          password: 'WrongPassword'
+          password: 'WrongPassword',
         })
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 401
-        })
+          status: 401,
+        }),
       });
     });
   });
@@ -113,16 +113,16 @@ describe('DeafAUTH - Identity Cortex API', () => {
     it('should verify a valid token', async () => {
       const mockResponse = {
         data: {
-          valid: true
-        }
+          valid: true,
+        },
       };
 
       axios.get.mockResolvedValue(mockResponse);
 
       const response = await axios.get(`${baseURL}/verify`, {
         headers: {
-          Authorization: 'Bearer valid_token'
-        }
+          Authorization: 'Bearer valid_token',
+        },
       });
 
       expect(response.data.valid).toBe(true);
@@ -132,20 +132,20 @@ describe('DeafAUTH - Identity Cortex API', () => {
       axios.get.mockRejectedValue({
         response: {
           status: 403,
-          data: { error: 'Invalid token' }
-        }
+          data: { error: 'Invalid token' },
+        },
       });
 
       await expect(
         axios.get(`${baseURL}/verify`, {
           headers: {
-            Authorization: 'Bearer invalid_token'
-          }
+            Authorization: 'Bearer invalid_token',
+          },
         })
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 403
-        })
+          status: 403,
+        }),
       });
     });
   });
@@ -156,14 +156,14 @@ describe('DeafAUTH - Identity Cortex API', () => {
         data: {
           accessToken: 'new_access_token',
           refreshToken: 'new_refresh_token',
-          expiresIn: 3600
-        }
+          expiresIn: 3600,
+        },
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
       const response = await axios.post(`${baseURL}/refresh`, {
-        refreshToken: 'valid_refresh_token'
+        refreshToken: 'valid_refresh_token',
       });
 
       expect(response.data).toHaveProperty('accessToken');
@@ -174,18 +174,18 @@ describe('DeafAUTH - Identity Cortex API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 401,
-          data: { error: 'Refresh token expired' }
-        }
+          data: { error: 'Refresh token expired' },
+        },
       });
 
       await expect(
         axios.post(`${baseURL}/refresh`, {
-          refreshToken: 'expired_token'
+          refreshToken: 'expired_token',
         })
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 401
-        })
+          status: 401,
+        }),
       });
     });
   });

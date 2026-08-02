@@ -23,18 +23,22 @@ describe('360Magicians - AI Agent Platform API', () => {
             id: 'agent_123',
             name: 'Test Agent',
             model: 'gpt-4',
-            createdAt: '2024-01-01T00:00:00Z'
-          }
+            createdAt: '2024-01-01T00:00:00Z',
+          },
         };
 
         axios.post.mockResolvedValue(mockResponse);
 
-        const response = await axios.post(`${baseURL}/agents`, {
-          name: 'Test Agent',
-          model: 'gpt-4'
-        }, {
-          headers: { Authorization: authToken }
-        });
+        const response = await axios.post(
+          `${baseURL}/agents`,
+          {
+            name: 'Test Agent',
+            model: 'gpt-4',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        );
 
         expect(response.data).toHaveProperty('id');
         expect(response.data.name).toBe('Test Agent');
@@ -50,21 +54,21 @@ describe('360Magicians - AI Agent Platform API', () => {
               id: 'agent_1',
               name: 'Agent 1',
               model: 'gpt-4',
-              createdAt: '2024-01-01T00:00:00Z'
+              createdAt: '2024-01-01T00:00:00Z',
             },
             {
               id: 'agent_2',
               name: 'Agent 2',
               model: 'claude-3',
-              createdAt: '2024-01-02T00:00:00Z'
-            }
-          ]
+              createdAt: '2024-01-02T00:00:00Z',
+            },
+          ],
         };
 
         axios.get.mockResolvedValue(mockResponse);
 
         const response = await axios.get(`${baseURL}/agents`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(Array.isArray(response.data)).toBe(true);
@@ -79,14 +83,14 @@ describe('360Magicians - AI Agent Platform API', () => {
             id: 'agent_123',
             name: 'Test Agent',
             model: 'gpt-4',
-            createdAt: '2024-01-01T00:00:00Z'
-          }
+            createdAt: '2024-01-01T00:00:00Z',
+          },
         };
 
         axios.get.mockResolvedValue(mockResponse);
 
         const response = await axios.get(`${baseURL}/agents/agent_123`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(response.data.id).toBe('agent_123');
@@ -96,18 +100,18 @@ describe('360Magicians - AI Agent Platform API', () => {
         axios.get.mockRejectedValue({
           response: {
             status: 404,
-            data: { error: 'Agent not found' }
-          }
+            data: { error: 'Agent not found' },
+          },
         });
 
         await expect(
           axios.get(`${baseURL}/agents/invalid_id`, {
-            headers: { Authorization: authToken }
+            headers: { Authorization: authToken },
           })
         ).rejects.toMatchObject({
           response: expect.objectContaining({
-            status: 404
-          })
+            status: 404,
+          }),
         });
       });
     });
@@ -117,7 +121,7 @@ describe('360Magicians - AI Agent Platform API', () => {
         axios.delete.mockResolvedValue({ status: 204 });
 
         const response = await axios.delete(`${baseURL}/agents/agent_123`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(response.status).toBe(204);
@@ -133,17 +137,21 @@ describe('360Magicians - AI Agent Platform API', () => {
             id: 'run_123',
             status: 'completed',
             startedAt: '2024-01-01T00:00:00Z',
-            output: 'Agent response here'
-          }
+            output: 'Agent response here',
+          },
         };
 
         axios.post.mockResolvedValue(mockResponse);
 
-        const response = await axios.post(`${baseURL}/agents/agent_123/execute`, {
-          input: 'Test input'
-        }, {
-          headers: { Authorization: authToken }
-        });
+        const response = await axios.post(
+          `${baseURL}/agents/agent_123/execute`,
+          {
+            input: 'Test input',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        );
 
         expect(response.data).toHaveProperty('id');
         expect(response.data).toHaveProperty('status');
@@ -157,14 +165,14 @@ describe('360Magicians - AI Agent Platform API', () => {
           data: {
             id: 'run_123',
             status: 'in_progress',
-            startedAt: '2024-01-01T00:00:00Z'
-          }
+            startedAt: '2024-01-01T00:00:00Z',
+          },
         };
 
         axios.get.mockResolvedValue(mockResponse);
 
         const response = await axios.get(`${baseURL}/runs/run_123`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(response.data.id).toBe('run_123');
@@ -181,20 +189,20 @@ describe('360Magicians - AI Agent Platform API', () => {
             {
               id: 'tool_1',
               name: 'Web Search',
-              description: 'Search the web for information'
+              description: 'Search the web for information',
             },
             {
               id: 'tool_2',
               name: 'Calculator',
-              description: 'Perform mathematical calculations'
-            }
-          ]
+              description: 'Perform mathematical calculations',
+            },
+          ],
         };
 
         axios.get.mockResolvedValue(mockResponse);
 
         const response = await axios.get(`${baseURL}/tools`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(Array.isArray(response.data)).toBe(true);
@@ -208,18 +216,22 @@ describe('360Magicians - AI Agent Platform API', () => {
           data: {
             id: 'tool_custom',
             name: 'Custom Tool',
-            description: 'A custom tool for specific tasks'
-          }
+            description: 'A custom tool for specific tasks',
+          },
         };
 
         axios.post.mockResolvedValue(mockResponse);
 
-        const response = await axios.post(`${baseURL}/tools`, {
-          name: 'Custom Tool',
-          description: 'A custom tool for specific tasks'
-        }, {
-          headers: { Authorization: authToken }
-        });
+        const response = await axios.post(
+          `${baseURL}/tools`,
+          {
+            name: 'Custom Tool',
+            description: 'A custom tool for specific tasks',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        );
 
         expect(response.data).toHaveProperty('id');
         expect(response.data.name).toBe('Custom Tool');
@@ -235,15 +247,15 @@ describe('360Magicians - AI Agent Platform API', () => {
             {
               id: 'mem_1',
               content: 'Previous conversation context',
-              timestamp: '2024-01-01T00:00:00Z'
-            }
-          ]
+              timestamp: '2024-01-01T00:00:00Z',
+            },
+          ],
         };
 
         axios.get.mockResolvedValue(mockResponse);
 
         const response = await axios.get(`${baseURL}/agents/agent_123/memory`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         });
 
         expect(Array.isArray(response.data)).toBe(true);
@@ -256,17 +268,21 @@ describe('360Magicians - AI Agent Platform API', () => {
           data: {
             id: 'mem_new',
             content: 'New memory content',
-            timestamp: '2024-01-01T00:00:00Z'
-          }
+            timestamp: '2024-01-01T00:00:00Z',
+          },
         };
 
         axios.post.mockResolvedValue(mockResponse);
 
-        const response = await axios.post(`${baseURL}/agents/agent_123/memory`, {
-          content: 'New memory content'
-        }, {
-          headers: { Authorization: authToken }
-        });
+        const response = await axios.post(
+          `${baseURL}/agents/agent_123/memory`,
+          {
+            content: 'New memory content',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        );
 
         expect(response.data).toHaveProperty('id');
         expect(response.data.content).toBe('New memory content');
@@ -279,8 +295,8 @@ describe('360Magicians - AI Agent Platform API', () => {
       it('should return health status', async () => {
         const mockResponse = {
           data: {
-            status: 'healthy'
-          }
+            status: 'healthy',
+          },
         };
 
         axios.get.mockResolvedValue(mockResponse);

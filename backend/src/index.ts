@@ -17,11 +17,11 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'healthy',
     service: 'Backend API',
     version: '2.0.0',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -36,7 +36,7 @@ app.get('/api/status', (req, res) => {
       fibonrose: 'running',
       accessibility: 'running',
       ai: 'running',
-    }
+    },
   });
 });
 

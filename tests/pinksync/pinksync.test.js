@@ -20,14 +20,14 @@ describe('PinkSync - Accessibility Engine API', () => {
       const mockResponse = {
         data: {
           online: true,
-          latencyMs: 45
-        }
+          latencyMs: 45,
+        },
       };
 
       axios.get.mockResolvedValue(mockResponse);
 
       const response = await axios.get(`${baseURL}/status`, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       expect(response.data).toHaveProperty('online');
@@ -40,18 +40,18 @@ describe('PinkSync - Accessibility Engine API', () => {
       axios.get.mockRejectedValue({
         response: {
           status: 503,
-          data: { error: 'Service temporarily unavailable' }
-        }
+          data: { error: 'Service temporarily unavailable' },
+        },
       });
 
       await expect(
         axios.get(`${baseURL}/status`, {
-          headers: { Authorization: authToken }
+          headers: { Authorization: authToken },
         })
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 503
-        })
+          status: 503,
+        }),
       });
     });
   });
@@ -62,17 +62,17 @@ describe('PinkSync - Accessibility Engine API', () => {
         captions: true,
         aslMode: true,
         contrast: 'high',
-        fontSize: 'large'
+        fontSize: 'large',
       };
 
       const mockResponse = {
-        data: preferences
+        data: preferences,
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
       const response = await axios.post(`${baseURL}/preferences`, preferences, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       expect(response.data).toMatchObject(preferences);
@@ -84,21 +84,25 @@ describe('PinkSync - Accessibility Engine API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 400,
-          data: { error: 'Invalid contrast value' }
-        }
+          data: { error: 'Invalid contrast value' },
+        },
       });
 
       await expect(
-        axios.post(`${baseURL}/preferences`, {
-          captions: true,
-          contrast: 'invalid_value'
-        }, {
-          headers: { Authorization: authToken }
-        })
+        axios.post(
+          `${baseURL}/preferences`,
+          {
+            captions: true,
+            contrast: 'invalid_value',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        )
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 400
-        })
+          status: 400,
+        }),
       });
     });
   });
@@ -110,25 +114,25 @@ describe('PinkSync - Accessibility Engine API', () => {
           {
             id: 'captions',
             name: 'Real-time Captions',
-            description: 'Auto-generated captions for all audio content'
+            description: 'Auto-generated captions for all audio content',
           },
           {
             id: 'asl',
             name: 'ASL Mode',
-            description: 'American Sign Language video interpretation'
+            description: 'American Sign Language video interpretation',
           },
           {
             id: 'contrast',
             name: 'High Contrast',
-            description: 'Enhanced visual contrast for better readability'
-          }
-        ]
+            description: 'Enhanced visual contrast for better readability',
+          },
+        ],
       };
 
       axios.get.mockResolvedValue(mockResponse);
 
       const response = await axios.get(`${baseURL}/features`, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       expect(Array.isArray(response.data)).toBe(true);
@@ -142,16 +146,14 @@ describe('PinkSync - Accessibility Engine API', () => {
       axios.get.mockRejectedValue({
         response: {
           status: 401,
-          data: { error: 'Authentication required' }
-        }
+          data: { error: 'Authentication required' },
+        },
       });
 
-      await expect(
-        axios.get(`${baseURL}/features`)
-      ).rejects.toMatchObject({
+      await expect(axios.get(`${baseURL}/features`)).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 401
-        })
+          status: 401,
+        }),
       });
     });
   });

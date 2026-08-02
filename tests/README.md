@@ -67,6 +67,7 @@ npm test -- tests/openapi.test.js
 The test suite covers:
 
 ### DeafAUTH (Identity Cortex)
+
 - ✅ User registration
 - ✅ User login
 - ✅ Token verification
@@ -75,6 +76,7 @@ The test suite covers:
 - ✅ Validation of email format
 
 ### PinkSync (Accessibility Engine)
+
 - ✅ Sync status checking
 - ✅ Accessibility preferences updates
 - ✅ Feature listing
@@ -82,6 +84,7 @@ The test suite covers:
 - ✅ Preference validation
 
 ### Fibonrose (Trust & Blockchain)
+
 - ✅ Transaction verification
 - ✅ Trust score retrieval
 - ✅ Transaction recording
@@ -89,6 +92,7 @@ The test suite covers:
 - ✅ Invalid transaction handling
 
 ### 360Magicians (AI Agent Platform)
+
 - ✅ Agent creation
 - ✅ Agent listing and retrieval
 - ✅ Agent deletion
@@ -99,6 +103,7 @@ The test suite covers:
 - ✅ Health checks
 
 ### DAO (Governance)
+
 - ✅ Proposal listing
 - ✅ Vote submission
 - ✅ Member listing
@@ -107,6 +112,7 @@ The test suite covers:
 - ✅ Status filtering
 
 ### OpenAPI Specifications
+
 - ✅ Valid OpenAPI 3.1.0 version
 - ✅ Required info fields
 - ✅ Server definitions
@@ -137,14 +143,14 @@ describe('Service Name API', () => {
     it('should perform expected action', async () => {
       // Mock response
       const mockResponse = {
-        data: { /* expected data */ }
+        data: {/* expected data */},
       };
 
       axios.get.mockResolvedValue(mockResponse);
 
       // Make request
       const response = await axios.get(`${baseURL}/endpoint`, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       // Assertions
@@ -188,6 +194,7 @@ npm run validate:openapi
 ```
 
 This validates all OpenAPI specifications for:
+
 - Correct OpenAPI version
 - Required fields
 - Valid schemas

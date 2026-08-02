@@ -60,7 +60,13 @@ async function validateAllSpecs() {
     } else {
       missingCount += 1;
       console.log(`\n⚠️  ${service}: No OpenAPI spec found`);
-      results.push({ valid: true, skipped: true, serviceName: service, pathCount: 0, endpointCount: 0 });
+      results.push({
+        valid: true,
+        skipped: true,
+        serviceName: service,
+        pathCount: 0,
+        endpointCount: 0,
+      });
     }
   }
 

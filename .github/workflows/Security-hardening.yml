@@ -2,9 +2,11 @@ name: Security Hardening
 
 on:
   pull_request:
-    branches: [ "develop" ]
+    branches: ['develop']
   push:
-    branches: [ "copilot/*" ] branches-ignore: docs
+    branches: ['copilot/*']
+    branches-ignore:
+      - docs
   schedule:
     # Run security checks daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -13,26 +15,26 @@ jobs:
   security-audit:
     name: Security Audit and Dependency Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run npm audit
         run: |
           echo "Running npm audit..."
           npm audit --audit-level=high
         continue-on-error: false
-      
+
       - name: Check for banned imports in /api
         run: |
           echo "Checking for banned database imports in /api directory..."
@@ -49,7 +51,7 @@ jobs:
             exit 1
           fi
           echo "✓ No banned imports found in /api directory"
-      
+
       - name: Check for committed secrets
         run: |
           echo "Checking for accidentally committed secrets..."
@@ -66,7 +68,7 @@ jobs:
             exit 1
           fi
           echo "✓ No obvious secrets found in repository"
-      
+
       - name: Check SECURITY.md exists
         run: |
           if [ ! -f "SECURITY.md" ]; then
@@ -74,7 +76,7 @@ jobs:
             exit 1
           fi
           echo "✓ SECURITY.md exists"
-      
+
       - name: Check agents.md exists
         run: |
           if [ ! -f "agents.md" ]; then
@@ -82,7 +84,7 @@ jobs:
             exit 1
           fi
           echo "✓ agents.md exists"
-      
+
       - name: Verify TypeScript compilation
         run: |
           echo "Checking TypeScript compilation..."
@@ -92,20 +94,20 @@ jobs:
   api-security:
     name: API Security Checks
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Check API routes for content-type enforcement
         run: |
           echo "Checking API routes for proper content-type handling..."
@@ -114,7 +116,7 @@ jobs:
             echo "WARNING: HTML content detected in API routes - API should return JSON only"
           fi
           echo "✓ API content-type check complete"
-      
+
       - name: Check for SQL injection vulnerabilities
         run: |
           echo "Checking for potential SQL injection patterns..."
@@ -126,11 +128,11 @@ jobs:
   pii-detection:
     name: PII and Sensitive Data Detection
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check for PII in test files
         run: |
           echo "Checking for real PII in test files..."
@@ -139,7 +141,7 @@ jobs:
             echo "WARNING: Real SSN patterns found in tests - use synthetic data only"
           fi
           echo "✓ PII detection check complete"
-      
+
       - name: Check for hardcoded credentials
         run: |
           echo "Checking for hardcoded credentials..."
@@ -151,11 +153,11 @@ jobs:
   dependency-pinning:
     name: Verify Dependency Pinning
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check for unpinned dependencies
         run: |
           echo "Checking package.json for unpinned dependencies..."
@@ -168,11 +170,11 @@ jobs:
   rate-limit-check:
     name: Verify Rate Limiting
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check for rate limiting implementation
         run: |
           echo "Checking for rate limiting in API routes..."
@@ -188,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [security-audit, api-security, pii-detection, dependency-pinning, rate-limit-check]
     if: always()
-    
+
     steps:
       - name: Summary
         run: |

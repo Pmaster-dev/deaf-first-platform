@@ -1,15 +1,17 @@
 [![CodeQL](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/github-code-scanning/codeql)
 [![Coverage](https://codecov.io/gh/pinkycollie/deaf-first-platform/branch/main/graph/badge.svg)](https://codecov.io/gh/pinkycollie/deaf-first-platform)
 [![Copilot code review](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer/badge.svg)](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer)
+
 # MBTQ Deaf-First Platform
 
 A comprehensive platform built with deaf-first principles, providing accessible financial services, AI-powered assistance, and decentralized governance.
- 
+
 ## 📚 MBTQ Components
 
 This repository contains OpenAPI specifications for all five core services of the MBTQ.dev:
 
 ### 1. **DeafAUTH - Identity Cortex**
+
 Secure authentication system designed with deaf-first principles.
 
 - **Location**: `Services/deafauth/`
@@ -18,13 +20,16 @@ Secure authentication system designed with deaf-first principles.
 - **OpenAPI Spec**: [openapi.yaml](Services/deafauth/openapi/openapi.yaml)
 
 ### 2. **PinkSync - Accessibility Engine**
+
 Real-time accessibility features and synchronization.
+
 - **Location**: `Services/pinksync/`
 - **Base URL**: `https://api.mbtq.dev/sync` (sync.mbtq.dev)
 - **Documentation**: [PinkSync README](Services/pinksync/README.md)
 - **OpenAPI Spec**: [openapi.yaml](Services/pinksync/openapi/openapi.yaml)
 
 ### 3. **Fibonrose - Trust & Blockchain**
+
 Decentralized trust and verification layer.
 
 - **Location**: `Services/fibonrose/`
@@ -33,13 +38,16 @@ Decentralized trust and verification layer.
 - **OpenAPI Spec**: [openapi.yaml](Services/fibonrose/openapi/openapi.yaml)
 
 ### 4. **360Magicians - AI Agents**
+
 Intelligent automation and assistance agents.
+
 - **Location**: `Services/magicians/`
 - **Base URL**: `https://api.mbtq.dev/magicians` magicians.mbtq.dev
 - **Documentation**: [360Magicians README](Services/magicians/README.md)
 - **OpenAPI Spec**: [openapi.yaml](Services/magicians/openapi/openapi.yaml)
 
 ### 5. **MBTQ DAO - Governance**
+
 Decentralized governance and community management.
 
 - **Location**: `Services/dao/`
@@ -59,7 +67,7 @@ Decentralized governance and community management.
 ✔ **Interactive HTML documentation**  
 ✔ **Fetch API examples for browsers**  
 ✔ **Architecture documentation**  
-✔ Production-ready specifications  
+✔ Production-ready specifications
 
 ## 📖 Documentation
 
@@ -89,6 +97,7 @@ Authorization: Bearer <your_token>
 ### Getting Started with Authentication
 
 1. Register a new user:
+
 ```bash
 curl -X POST https://api.mbtq.dev/auth/register \
   -H "Content-Type: application/json" \
@@ -96,6 +105,7 @@ curl -X POST https://api.mbtq.dev/auth/register \
 ```
 
 2. Login to get tokens:
+
 ```bash
 curl -X POST https://api.mbtq.dev/auth/login \
   -H "Content-Type: application/json" \
@@ -103,6 +113,7 @@ curl -X POST https://api.mbtq.dev/auth/login \
 ```
 
 3. Use the access token for API calls:
+
 ```bash
 curl -X GET https://api.mbtq.dev/sync/status \
   -H "Authorization: Bearer <your_access_token>"
@@ -255,11 +266,11 @@ Generated SDKs will be in the `sdks/` directory. See [SDK.md](SDK.md) for detail
 ```javascript
 const deafAuthMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
-  
+
   try {
     const decoded = await verifyDeafAuthToken(token);
     req.user = decoded;
@@ -277,12 +288,12 @@ module.exports = deafAuthMiddleware;
 ```javascript
 const pinkSyncMiddleware = async (req, res, next) => {
   const userId = req.user?.id;
-  
+
   if (userId) {
     const preferences = await getPinkSyncPreferences(userId);
     req.accessibilityPrefs = preferences;
   }
-  
+
   next();
 };
 
@@ -381,6 +392,7 @@ See LICENSE file for details.
 ## 🌟 Acknowledgments
 
 Built with deaf-first principles and a commitment to accessibility for all.
+
 # DEAF-FIRST Platform
 
 [![CI/CD Pipeline](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/ci.yml/badge.svg)](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/ci.yml)
@@ -442,23 +454,27 @@ The platform features a modern, cutting-edge showcase interface that demonstrate
 ## Quick Start
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/pinkycollie/Deaf-First-Platform.git
 cd Deaf-First-Platform
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 4. Run all services in development mode:
+
 ```bash
 npm run dev
 ```
@@ -466,11 +482,13 @@ npm run dev
 ## Development Scripts
 
 ### Run all services
+
 ```bash
 npm run dev
 ```
 
 ### Run individual services
+
 ```bash
 npm run dev:frontend    # Frontend only
 npm run dev:backend     # Backend only
@@ -481,17 +499,20 @@ npm run dev:a11y        # Accessibility nodes only
 ```
 
 ### Build
+
 ```bash
 npm run build           # Build all workspaces
 ```
 
 ### Testing
+
 ```bash
 npm run test            # Run all tests
 npm run test:e2e        # Run end-to-end tests
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint            # Lint all workspaces
 npm run format          # Format code with Prettier
@@ -499,6 +520,7 @@ npm run type-check      # TypeScript type checking
 ```
 
 ### Database
+
 ```bash
 npm run db:setup        # Setup databases
 npm run db:migrate      # Run migrations
@@ -506,6 +528,7 @@ npm run db:seed         # Seed databases
 ```
 
 ### Docker
+
 ```bash
 npm run docker:up       # Start all services with Docker
 npm run docker:down     # Stop Docker services
@@ -525,6 +548,7 @@ npm run dev:backend
 ```
 
 **Features:**
+
 - Register and manage webhooks via REST API
 - Receive webhooks from external services (Xano, Stripe, etc.)
 - HMAC-SHA256 signature verification
@@ -533,6 +557,7 @@ npm run dev:backend
 - Test endpoints for development
 
 **Documentation:**
+
 - [Quick Start Guide](./QUICKSTART-WEBHOOKS.md) - Get started in minutes
 - [API Reference](./WEBHOOK-API.md) - Complete API documentation
 - [Migration Guide](./WEBHOOK-MIGRATION-GUIDE.md) - Migrate from Xano
@@ -560,42 +585,49 @@ To run MCP servers individually:
 Each workspace is independently versioned and can be developed, tested, and deployed separately.
 
 ### Frontend (@deaf-first/frontend)
+
 - React 18 with TypeScript
 - Vite for fast development
 - Accessible UI components
 - Sign language support
 
 ### Backend (@deaf-first/backend)
+
 - Express.js REST API
 - PostgreSQL database
 - JWT authentication
 - RESTful endpoints
 
 ### DeafAUTH (@mbtq/deafauth)
+
 - Specialized authentication service
 - Accessible authentication flows
 - MCP server for auth operations
 - User preference management
 
 ### PinkSync (@mbtq/pinksync)
+
 - Real-time WebSocket synchronization
 - Redis-based pub/sub
 - MCP server for sync operations
 - Event-driven architecture
 
 ### FibonRose (@mbtq/fibonrose)
+
 - Mathematical optimization algorithms
 - Fibonacci-based scheduling
 - MCP server for optimization queries
 - Performance analytics
 
 ### Accessibility Nodes (@mbtq/accessibility-nodes)
+
 - Modular accessibility features
 - Sign language interpretation
 - Visual accessibility enhancements
 - MCP server for accessibility APIs
 
 ### AI Services (@mbtq/ai)
+
 - AI-powered workflows
 - Natural language processing
 - Sign language generation
@@ -673,6 +705,6 @@ MIT License - see LICENSE file for details
 - Accessibility
 - SaaS ecosystem
 - modules workflows
-- http platform management 
+- http platform management
 - Real-time synchronization
 - Sign language support
