@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { WebhookConfig, WebhookEvent, WebhookDelivery } from '../types/webhook.types';
+import { WebhookConfig, WebhookDelivery } from '../types/webhook.types.js';
 
 /**
  * In-memory storage for webhooks (in production, use a database)
@@ -14,7 +14,7 @@ class WebhookService {
   registerWebhook(name: string, url: string, events: string[], secret?: string): WebhookConfig {
     const id = this.generateId();
     const generatedSecret = secret || this.generateSecret();
-    
+
     const webhook: WebhookConfig = {
       id,
       name,
@@ -160,16 +160,25 @@ class WebhookService {
     // Normalize signatures to ensure they're in the same format (hex)
     const normalizedSignature = signature.toLowerCase().trim();
     const normalizedExpected = expectedSignature.toLowerCase().trim();
-    
+
+    const hexPattern = /^[0-9a-f]+$/;
+    if (!hexPattern.test(normalizedSignature) || !hexPattern.test(normalizedExpected)) {
+      return false;
+    }
+
     // Ensure both signatures have the same length before comparison
     if (normalizedSignature.length !== normalizedExpected.length) {
       return false;
     }
-    
-    return crypto.timingSafeEqual(
-      Buffer.from(normalizedSignature, 'hex'),
-      Buffer.from(normalizedExpected, 'hex')
-    );
+
+    const signatureBuffer = Buffer.from(normalizedSignature, 'hex');
+    const expectedBuffer = Buffer.from(normalizedExpected, 'hex');
+
+    if (signatureBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
   }
 
   /**

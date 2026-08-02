@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { WebhookEvent } from '../types/webhook.types';
+import { WebhookEvent } from '../types/webhook.types.js';
 
 const router = Router();
 
@@ -24,7 +24,7 @@ router.post('/:service', async (req: Request, res: Response) => {
       event: event || 'unknown',
       timestamp: new Date().toISOString(),
       data: req.body,
-      signature
+      signature,
     };
 
     // Process based on service type
@@ -46,14 +46,14 @@ router.post('/:service', async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       message: 'Webhook received successfully',
-      eventId: webhookEvent.id
+      eventId: webhookEvent.id,
     });
   } catch (error) {
     console.error('[Incoming Webhook] Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process webhook',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -63,7 +63,7 @@ router.post('/:service', async (req: Request, res: Response) => {
  */
 async function handleXanoWebhook(event: WebhookEvent): Promise<void> {
   console.log('[Xano Webhook] Processing:', event.event);
-  
+
   // Add Xano-specific processing logic here
   switch (event.event) {
     case 'record.created':
@@ -85,7 +85,7 @@ async function handleXanoWebhook(event: WebhookEvent): Promise<void> {
  */
 async function handleStripeWebhook(event: WebhookEvent): Promise<void> {
   console.log('[Stripe Webhook] Processing:', event.event);
-  
+
   // Add Stripe-specific processing logic here
   switch (event.event) {
     case 'payment_intent.succeeded':
@@ -115,7 +115,7 @@ router.get('/health', (req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'Incoming webhook endpoint is healthy',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 

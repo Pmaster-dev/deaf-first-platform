@@ -19,17 +19,21 @@ describe('Fibonrose - Trust & Blockchain API', () => {
     it('should verify a blockchain transaction', async () => {
       const mockResponse = {
         data: {
-          valid: true
-        }
+          valid: true,
+        },
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
-      const response = await axios.post(`${baseURL}/verify`, {
-        txId: '0x123456789abcdef'
-      }, {
-        headers: { Authorization: authToken }
-      });
+      const response = await axios.post(
+        `${baseURL}/verify`,
+        {
+          txId: '0x123456789abcdef',
+        },
+        {
+          headers: { Authorization: authToken },
+        }
+      );
 
       expect(response.data.valid).toBe(true);
     });
@@ -37,17 +41,21 @@ describe('Fibonrose - Trust & Blockchain API', () => {
     it('should fail verification for invalid transaction', async () => {
       const mockResponse = {
         data: {
-          valid: false
-        }
+          valid: false,
+        },
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
-      const response = await axios.post(`${baseURL}/verify`, {
-        txId: 'invalid_tx_id'
-      }, {
-        headers: { Authorization: authToken }
-      });
+      const response = await axios.post(
+        `${baseURL}/verify`,
+        {
+          txId: 'invalid_tx_id',
+        },
+        {
+          headers: { Authorization: authToken },
+        }
+      );
 
       expect(response.data.valid).toBe(false);
     });
@@ -56,18 +64,22 @@ describe('Fibonrose - Trust & Blockchain API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 400,
-          data: { error: 'txId is required' }
-        }
+          data: { error: 'txId is required' },
+        },
       });
 
       await expect(
-        axios.post(`${baseURL}/verify`, {}, {
-          headers: { Authorization: authToken }
-        })
+        axios.post(
+          `${baseURL}/verify`,
+          {},
+          {
+            headers: { Authorization: authToken },
+          }
+        )
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 400
-        })
+          status: 400,
+        }),
       });
     });
   });
@@ -77,14 +89,14 @@ describe('Fibonrose - Trust & Blockchain API', () => {
       const mockResponse = {
         data: {
           score: 95.5,
-          lastUpdated: '2024-01-01T00:00:00Z'
-        }
+          lastUpdated: '2024-01-01T00:00:00Z',
+        },
       };
 
       axios.get.mockResolvedValue(mockResponse);
 
       const response = await axios.get(`${baseURL}/trust-score`, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       expect(response.data).toHaveProperty('score');
@@ -96,16 +108,14 @@ describe('Fibonrose - Trust & Blockchain API', () => {
       axios.get.mockRejectedValue({
         response: {
           status: 401,
-          data: { error: 'Authentication required' }
-        }
+          data: { error: 'Authentication required' },
+        },
       });
 
-      await expect(
-        axios.get(`${baseURL}/trust-score`)
-      ).rejects.toMatchObject({
+      await expect(axios.get(`${baseURL}/trust-score`)).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 401
-        })
+          status: 401,
+        }),
       });
     });
   });
@@ -117,18 +127,18 @@ describe('Fibonrose - Trust & Blockchain API', () => {
         timestamp: '2024-01-01T00:00:00Z',
         payload: {
           type: 'verification',
-          data: { verified: true }
-        }
+          data: { verified: true },
+        },
       };
 
       const mockResponse = {
-        data: transaction
+        data: transaction,
       };
 
       axios.post.mockResolvedValue(mockResponse);
 
       const response = await axios.post(`${baseURL}/record`, transaction, {
-        headers: { Authorization: authToken }
+        headers: { Authorization: authToken },
       });
 
       expect(response.data).toMatchObject(transaction);
@@ -139,20 +149,24 @@ describe('Fibonrose - Trust & Blockchain API', () => {
       axios.post.mockRejectedValue({
         response: {
           status: 400,
-          data: { error: 'Invalid transaction format' }
-        }
+          data: { error: 'Invalid transaction format' },
+        },
       });
 
       await expect(
-        axios.post(`${baseURL}/record`, {
-          invalidField: 'value'
-        }, {
-          headers: { Authorization: authToken }
-        })
+        axios.post(
+          `${baseURL}/record`,
+          {
+            invalidField: 'value',
+          },
+          {
+            headers: { Authorization: authToken },
+          }
+        )
       ).rejects.toMatchObject({
         response: expect.objectContaining({
-          status: 400
-        })
+          status: 400,
+        }),
       });
     });
   });
