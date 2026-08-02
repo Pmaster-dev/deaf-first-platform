@@ -50,7 +50,7 @@ def list_models():
         return jsonify(json.loads(result.stdout))
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to list models: {str(e)}")
-        return jsonify({"status": "error", "message": f"Failed to list models: {str(e)}"}), 500
+        return jsonify({"status": "error", "message": "Failed to list models"}), 500
     except json.JSONDecodeError:
         return jsonify({"status": "error", "message": "Invalid response from Ollama API"}), 500
 
