@@ -175,23 +175,15 @@ jobs:
           path: terraform/tfplan-${{ matrix.environment }}
           retention-days: 5
 
-  # ── Apply — dev / staging (auto on main) ─────────────────────────────────
-  apply-nonprod:
-    name: Apply (${{ matrix.environment }})
+  # ── Apply — development (auto on main) ──────────────────────────────────
+  apply-dev:
+    name: Apply (development)
     runs-on: ubuntu-latest
     needs: plan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    strategy:
-      max-parallel: 1
-      matrix:
-        include:
-          - environment: development
-            credentials_secret: GCP_CREDENTIALS
-          - environment: staging
-            credentials_secret: GCP_CREDENTIALS_STAGING
 
     environment:
-      name: ${{ matrix.environment }}
+      name: development
 
     steps:
       - name: Checkout
@@ -213,7 +205,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets[matrix.credentials_secret] }}
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
@@ -221,21 +213,21 @@ jobs:
       - name: Download plan artifact
         uses: actions/download-artifact@v4
         with:
-          name: tgplan-${{ matrix.environment }}
+          name: tgplan-development
           path: terraform
 
-      - name: Terragrunt Init (${{ matrix.environment }})
+      - name: Terragrunt Init (development)
         run: |
           cd terraform
           terragrunt init \
             --terragrunt-tfpath terraform \
-            -backend-config=backend-${{ matrix.environment }}.tfbackend \
+            -backend-config=backend-development.tfbackend \
             -no-color
 
-      - name: Terragrunt Apply (${{ matrix.environment }})
+      - name: Terragrunt Apply (development)
         run: |
           cd terraform
-          terragrunt apply -auto-approve tfplan-${{ matrix.environment }}
+          terragrunt apply -auto-approve tfplan-development
 
       - name: Capture outputs
         run: |
@@ -245,19 +237,95 @@ jobs:
       - name: Upload outputs artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tgoutputs-${{ matrix.environment }}
+          name: tgoutputs-development
           path: terraform/outputs.json
           retention-days: 30
 
       - name: Write deployment summary
         run: |
-          echo "## 🚀 Terragrunt deploy — \`${{ matrix.environment }}\` complete" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Terragrunt deploy — \`development\` complete" >> $GITHUB_STEP_SUMMARY
           echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Environment** | \`${{ matrix.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | \`development\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Deployed by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Outputs** | See \`tgoutputs-${{ matrix.environment }}\` artifact |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Outputs** | See \`tgoutputs-development\` artifact |" >> $GITHUB_STEP_SUMMARY
+
+  # ── Apply — staging (auto on main, after dev) ────────────────────────────
+  apply-staging:
+    name: Apply (staging)
+    runs-on: ubuntu-latest
+    needs: apply-dev
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          curl -sL \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64" \
+            -o /usr/local/bin/terragrunt
+          chmod +x /usr/local/bin/terragrunt
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_STAGING }}
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tgplan-staging
+          path: terraform
+
+      - name: Terragrunt Init (staging)
+        run: |
+          cd terraform
+          terragrunt init \
+            --terragrunt-tfpath terraform \
+            -backend-config=backend-staging.tfbackend \
+            -no-color
+
+      - name: Terragrunt Apply (staging)
+        run: |
+          cd terraform
+          terragrunt apply -auto-approve tfplan-staging
+
+      - name: Capture outputs
+        run: |
+          cd terraform
+          terragrunt output -json > outputs.json
+
+      - name: Upload outputs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tgoutputs-staging
+          path: terraform/outputs.json
+          retention-days: 30
+
+      - name: Write deployment summary
+        run: |
+          echo "## 🚀 Terragrunt deploy — \`staging\` complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | \`staging\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Outputs** | See \`tgoutputs-staging\` artifact |" >> $GITHUB_STEP_SUMMARY
 
   # ── Apply — production (manual only) ─────────────────────────────────────
   apply-production:
