@@ -127,9 +127,9 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: development
-      backend-config: backend-development.tfbackend
-      plan-artifact-name: tfplan-development
-      outputs-retention-days: 30
+      backend_config: backend-development.tfbackend
+      plan_artifact_name: tfplan-development
+      outputs_retention_days: 30
     secrets:
       gcp-credentials: ${{ secrets.GCP_CREDENTIALS }}
 
@@ -140,9 +140,9 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: staging
-      backend-config: backend-staging.tfbackend
-      plan-artifact-name: tfplan-staging
-      outputs-retention-days: 30
+      backend_config: backend-staging.tfbackend
+      plan_artifact_name: tfplan-staging
+      outputs_retention_days: 30
     secrets:
       gcp-credentials: ${{ secrets.GCP_CREDENTIALS_STAGING }}
 
@@ -153,11 +153,11 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: production
-      backend-config: backend-prod.tfbackend
-      tfvars-file: terraform.tfvars.prod
-      plan-inline: true
-      plan-artifact-name: tfplan-production
-      outputs-retention-days: 90
+      backend_config: backend-prod.tfbackend
+      tfvars_file: terraform.tfvars.prod
+      plan_inline: true
+      plan_artifact_name: tfplan-production
+      outputs_retention_days: 90
     secrets:
       gcp-credentials: ${{ secrets.GCP_CREDENTIALS_PRODUCTION }}
 

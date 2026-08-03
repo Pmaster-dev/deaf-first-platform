@@ -38,31 +38,31 @@ on:
         description: 'Target environment name (development | staging | production)'
         required: true
         type: string
-      terraform-version:
+      terraform_version:
         description: 'Terraform version to install'
         type: string
         default: '1.5.0'
-      backend-config:
+      backend_config:
         description: 'Backend config filename relative to the terraform/ directory (e.g. backend-development.tfbackend)'
         required: true
         type: string
-      tfvars-file:
-        description: 'Terraform vars file relative to the terraform/ directory. Required when plan-inline is true.'
+      tfvars_file:
+        description: 'Terraform vars file relative to the terraform/ directory. Required when plan_inline is true.'
         type: string
         default: ''
-      plan-inline:
+      plan_inline:
         description: 'When true, run terraform plan locally before applying instead of downloading an artifact'
         type: boolean
         default: false
-      plan-artifact-name:
-        description: 'Name of the tfplan artifact to download (when plan-inline is false) or upload (when plan-inline is true)'
+      plan_artifact_name:
+        description: 'Name of the tfplan artifact to download (when plan_inline is false) or upload (when plan_inline is true)'
         required: true
         type: string
-      upload-outputs:
+      upload_outputs:
         description: 'Upload terraform output as a JSON artifact'
         type: boolean
         default: true
-      outputs-retention-days:
+      outputs_retention_days:
         description: 'Retention period in days for the outputs artifact'
         type: number
         default: 30
@@ -85,7 +85,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ inputs.terraform-version }}
+          terraform_version: ${{ inputs.terraform_version }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -98,44 +98,43 @@ jobs:
       - name: Terraform Init
         run: |
           cd terraform
-          terraform init -backend-config=${{ inputs.backend-config }}
+          terraform init -backend-config=${{ inputs.backend_config }}
 
       # -- Plan-inline path (e.g. production) -----------------------------------
       - name: Terraform Plan (inline)
-        if: ${{ inputs.plan-inline }}
+        if: ${{ inputs.plan_inline }}
         run: |
           cd terraform
           terraform plan \
-            -var-file=${{ inputs.tfvars-file }} \
-            -out=${{ inputs.plan-artifact-name }} \
+            -var-file=${{ inputs.tfvars_file }} \
+            -out=${{ inputs.plan_artifact_name }} \
             -no-color
 
       # -- Artifact path (dev / staging already planned upstream) ---------------
       - name: Download Plan Artifact
-        if: ${{ !inputs.plan-inline }}
+        if: ${{ !inputs.plan_inline }}
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.plan-artifact-name }}
+          name: ${{ inputs.plan_artifact_name }}
           path: terraform
 
       - name: Terraform Apply
         run: |
           cd terraform
-          terraform apply -auto-approve ${{ inputs.plan-artifact-name }}
+          terraform apply -auto-approve ${{ inputs.plan_artifact_name }}
 
       - name: Terraform Output
         run: |
           cd terraform
           terraform output -json > outputs.json
-          cat outputs.json
 
       - name: Upload Terraform Outputs
-        if: ${{ inputs.upload-outputs }}
+        if: ${{ inputs.upload_outputs }}
         uses: actions/upload-artifact@v4
         with:
           name: terraform-outputs-${{ inputs.environment }}
           path: terraform/outputs.json
-          retention-days: ${{ inputs.outputs-retention-days }}
+          retention-days: ${{ inputs.outputs_retention_days }}
 
       - name: Write Deployment Summary
         run: |
@@ -148,6 +147,4 @@ jobs:
           echo "| **Timestamp** | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Infrastructure Outputs" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-          cat terraform/outputs.json >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "Terraform outputs are available in the \`terraform-outputs-${{ inputs.environment }}\` artifact." >> $GITHUB_STEP_SUMMARY

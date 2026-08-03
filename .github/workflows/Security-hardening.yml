@@ -20,10 +20,10 @@ jobs:
     name: Security Audit and Dependency Scan
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
-      node-version: '20'
-      audit-level: 'high'
-      continue-on-audit-error: true
-      check-banned-imports: true
+      node_version: '20'
+      audit_level: 'high'
+      continue_on_audit_error: true
+      check_banned_imports: true
 
   # Compliance checks that are specific to this workflow.
   compliance-checks:
