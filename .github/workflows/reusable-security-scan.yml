@@ -15,19 +15,19 @@ name: Reusable Security Scan
 on:
   workflow_call:
     inputs:
-      node-version:
+      node_version:
         description: 'Node.js version to use for npm audit'
         type: string
         default: '20'
-      audit-level:
+      audit_level:
         description: 'Minimum severity that causes npm audit to fail (low, moderate, high, critical)'
         type: string
         default: 'high'
-      continue-on-audit-error:
+      continue_on_audit_error:
         description: 'Allow the workflow to continue even when npm audit finds issues'
         type: boolean
         default: true
-      check-banned-imports:
+      check_banned_imports:
         description: 'Run the banned-import check against the /api directory'
         type: boolean
         default: true
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node-version }}
+          node-version: ${{ inputs.node_version }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -52,9 +52,9 @@ jobs:
 
       - name: Run npm audit
         run: |
-          echo "Running npm audit (level: ${{ inputs.audit-level }})..."
-          npm audit --audit-level=${{ inputs.audit-level }}
-        continue-on-error: ${{ inputs.continue-on-audit-error }}
+          echo "Running npm audit (level: ${{ inputs.audit_level }})..."
+          npm audit --audit-level=${{ inputs.audit_level }}
+        continue-on-error: ${{ inputs.continue_on_audit_error }}
 
       - name: Generate audit report
         run: npm audit --json > audit-report.json || true
@@ -116,7 +116,7 @@ jobs:
   banned-imports:
     name: Banned Import Check
     runs-on: ubuntu-latest
-    if: ${{ inputs.check-banned-imports }}
+    if: ${{ inputs.check_banned_imports }}
 
     steps:
       - name: Checkout code
