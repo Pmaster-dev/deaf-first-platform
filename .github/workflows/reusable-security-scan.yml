@@ -1,0 +1,155 @@
+name: Reusable Security Scan
+
+# Canonical security scanning workflow. Call this from any workflow that
+# needs npm audit, secret detection, or banned-import checks so that all
+# security logic lives in one place and stays consistent.
+#
+# Usage:
+#   jobs:
+#     security:
+#       uses: ./.github/workflows/reusable-security-scan.yml
+#       with:
+#         node-version: '20'
+#         audit-level: 'high'
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: 'Node.js version to use for npm audit'
+        type: string
+        default: '20'
+      audit_level:
+        description: 'Minimum severity that causes npm audit to fail (low, moderate, high, critical)'
+        type: string
+        default: 'high'
+      continue_on_audit_error:
+        description: 'Allow the workflow to continue even when npm audit finds issues'
+        type: boolean
+        default: true
+      check_banned_imports:
+        description: 'Run the banned-import check against the /api directory'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+  packages: read
+
+jobs:
+  npm-audit:
+    name: NPM Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "Running npm audit (level: ${{ inputs.audit_level }})..."
+          npm audit --audit-level=${{ inputs.audit_level }}
+        continue-on-error: ${{ inputs.continue_on_audit_error }}
+
+      - name: Generate audit report
+        run: npm audit --json > audit-report.json || true
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+  secret-scan:
+    name: Committed Secret Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for committed secrets
+        run: |
+          echo "Checking for accidentally committed secrets..."
+
+          # Exclude .github so that workflow files referencing these patterns
+          # as grep arguments do not self-match and cause false positives.
+          EXCLUDES="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github"
+
+          FOUND_ERRORS=0
+
+          # Stripe live secret key
+          PATTERN_STRIPE_LIVE="sk_live_"
+          if grep -r "${PATTERN_STRIPE_LIVE}" . ${EXCLUDES} 2>/dev/null; then
+            echo "ERROR: Stripe live secret key found in repository"
+            FOUND_ERRORS=1
+          else
+            echo "✓ No Stripe live keys found"
+          fi
+
+          # Stripe test secret key (warning only – should live in env vars)
+          PATTERN_STRIPE_TEST="sk_test_"
+          if grep -r "${PATTERN_STRIPE_TEST}" . ${EXCLUDES} --exclude=".env.example" 2>/dev/null; then
+            echo "WARNING: Stripe test secret key found – move to environment variables"
+          fi
+
+          # Private key material
+          if grep -r "PRIVATE_KEY" . ${EXCLUDES} --exclude="*.md" 2>/dev/null \
+              | grep -v "PRIVATE_KEY_PATH"; then
+            echo "ERROR: Private key found in repository"
+            FOUND_ERRORS=1
+          else
+            echo "✓ No private key material found"
+          fi
+
+          if [ "$FOUND_ERRORS" -ne 0 ]; then
+            exit 1
+          fi
+          echo "✓ Secret scan passed"
+
+  banned-imports:
+    name: Banned Import Check
+    runs-on: ubuntu-latest
+    if: ${{ inputs.check_banned_imports }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for banned imports in /api
+        run: |
+          echo "Checking for banned database imports in /api directory..."
+
+          if [ ! -d "./api" ]; then
+            echo "ℹ  No /api directory found – skipping banned-import check"
+            exit 0
+          fi
+
+          FOUND_ERRORS=0
+
+          if grep -r "import.*drizzle" ./api/ 2>/dev/null; then
+            echo "ERROR: Direct drizzle import found in /api"
+            FOUND_ERRORS=1
+          fi
+          if grep -r "import.*pg\>" ./api/ 2>/dev/null; then
+            echo "ERROR: Direct pg import found in /api"
+            FOUND_ERRORS=1
+          fi
+          if grep -r "from ['\"]drizzle" ./api/ 2>/dev/null; then
+            echo "ERROR: Direct drizzle import (from …) found in /api"
+            FOUND_ERRORS=1
+          fi
+
+          if [ "$FOUND_ERRORS" -ne 0 ]; then exit 1; fi
+          echo "✓ No banned imports found in /api"

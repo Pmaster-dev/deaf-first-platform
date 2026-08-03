@@ -1,0 +1,37 @@
+name: Renovate
+
+on:
+  # Run every day at 03:00 UTC so PRs are ready when the team starts work.
+  schedule:
+    - cron: '0 3 * * *'
+  # Allow a one-off manual run from the Actions tab.
+  workflow_dispatch:
+    inputs:
+      log_level:
+        description: 'Renovate log level (debug | info | warn | error)'
+        required: false
+        default: 'info'
+        type: choice
+        options: [debug, info, warn, error]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  renovate:
+    name: Renovate dependency updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@v41
+        with:
+          configurationFile: .github/renovate.json
+          token: ${{ secrets.RENOVATE_TOKEN || secrets.GITHUB_TOKEN }}
+        env:
+          LOG_LEVEL: ${{ inputs.log_level || 'info' }}
