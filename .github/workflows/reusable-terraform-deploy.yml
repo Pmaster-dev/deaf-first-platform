@@ -1,7 +1,7 @@
-name: Reusable Terraform Deploy
+name: Reusable Terragrunt Deploy
 
-# Canonical Terraform apply workflow for one environment.
-# Callers provide the environment name, backend config, plan artifact name,
+# Canonical Terragrunt apply workflow for one environment.
+# Callers provide the environment name, Terragrunt env-dir, plan artifact name,
 # and GCP credentials; this workflow handles the rest.
 #
 # Usage (apply from a previously uploaded plan artifact):
@@ -11,7 +11,7 @@ name: Reusable Terraform Deploy
 #       uses: ./.github/workflows/reusable-terraform-deploy.yml
 #       with:
 #         environment: development
-#         backend-config: backend-development.tfbackend
+#         env-dir: terragrunt/environments/dev
 #         plan-artifact-name: tfplan-development
 #         outputs-retention-days: 30
 #       secrets:
@@ -23,8 +23,7 @@ name: Reusable Terraform Deploy
 #       uses: ./.github/workflows/reusable-terraform-deploy.yml
 #       with:
 #         environment: production
-#         backend-config: backend-prod.tfbackend
-#         tfvars-file: terraform.tfvars.prod
+#         env-dir: terragrunt/environments/production
 #         plan-inline: true
 #         plan-artifact-name: tfplan-production
 #         outputs-retention-days: 90
@@ -42,16 +41,16 @@ on:
         description: 'Terraform version to install'
         type: string
         default: '1.5.0'
-      backend-config:
-        description: 'Backend config filename relative to the terraform/ directory (e.g. backend-development.tfbackend)'
+      terragrunt-version:
+        description: 'Terragrunt version to install'
+        type: string
+        default: '0.68.9'
+      env-dir:
+        description: 'Path to the Terragrunt environment directory (e.g. terragrunt/environments/dev)'
         required: true
         type: string
-      tfvars-file:
-        description: 'Terraform vars file relative to the terraform/ directory. Required when plan-inline is true.'
-        type: string
-        default: ''
       plan-inline:
-        description: 'When true, run terraform plan locally before applying instead of downloading an artifact'
+        description: 'When true, run terragrunt plan locally before applying instead of downloading an artifact'
         type: boolean
         default: false
       plan-artifact-name:
@@ -73,7 +72,7 @@ on:
 
 jobs:
   terraform-apply:
-    name: Terraform Apply – ${{ inputs.environment }}
+    name: Terragrunt Apply – ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment }}
@@ -86,6 +85,16 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ inputs.terraform-version }}
+          terraform_wrapper: false
+
+      - name: Install Terragrunt
+        run: |
+          TG_VERSION="${{ inputs.terragrunt-version }}"
+          curl -sSL \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64" \
+            -o /usr/local/bin/terragrunt
+          chmod +x /usr/local/bin/terragrunt
+          terragrunt --version
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -95,19 +104,19 @@ jobs:
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Terraform Init
+      - name: Terragrunt Init
         run: |
-          cd terraform
-          terraform init -backend-config=${{ inputs.backend-config }}
+          cd ${{ inputs.env-dir }}
+          terragrunt init --terragrunt-non-interactive
 
       # -- Plan-inline path (e.g. production) -----------------------------------
-      - name: Terraform Plan (inline)
+      - name: Terragrunt Plan (inline)
         if: ${{ inputs.plan-inline }}
         run: |
-          cd terraform
-          terraform plan \
-            -var-file=${{ inputs.tfvars-file }} \
-            -out=${{ inputs.plan-artifact-name }} \
+          cd ${{ inputs.env-dir }}
+          terragrunt plan \
+            --terragrunt-non-interactive \
+            -out="${{ github.workspace }}/${{ inputs.plan-artifact-name }}" \
             -no-color
 
       # -- Artifact path (dev / staging already planned upstream) ---------------
@@ -116,30 +125,33 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.plan-artifact-name }}
-          path: terraform
+          path: ${{ github.workspace }}
 
-      - name: Terraform Apply
+      - name: Terragrunt Apply
         run: |
-          cd terraform
-          terraform apply -auto-approve ${{ inputs.plan-artifact-name }}
+          cd ${{ inputs.env-dir }}
+          terragrunt apply \
+            --terragrunt-non-interactive \
+            -auto-approve \
+            "${{ github.workspace }}/${{ inputs.plan-artifact-name }}"
 
       - name: Terraform Output
         run: |
-          cd terraform
-          terraform output -json > outputs.json
-          cat outputs.json
+          cd ${{ inputs.env-dir }}
+          terragrunt output -json > "${{ github.workspace }}/outputs.json"
+          cat "${{ github.workspace }}/outputs.json"
 
       - name: Upload Terraform Outputs
         if: ${{ inputs.upload-outputs }}
         uses: actions/upload-artifact@v4
         with:
           name: terraform-outputs-${{ inputs.environment }}
-          path: terraform/outputs.json
+          path: ${{ github.workspace }}/outputs.json
           retention-days: ${{ inputs.outputs-retention-days }}
 
       - name: Write Deployment Summary
         run: |
-          echo "## 🚀 Terraform deployment to \`${{ inputs.environment }}\` complete" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Terragrunt deployment to \`${{ inputs.environment }}\` complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -149,5 +161,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Infrastructure Outputs" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-          cat terraform/outputs.json >> $GITHUB_STEP_SUMMARY
+          cat "${{ github.workspace }}/outputs.json" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

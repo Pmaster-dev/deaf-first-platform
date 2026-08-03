@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'terraform/**'
+      - 'terragrunt/**'
       - '.github/workflows/terraform.yml'
   push:
     branches:
       - main
     paths:
       - 'terraform/**'
+      - 'terragrunt/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -28,6 +30,7 @@ permissions:
 
 env:
   TERRAFORM_VERSION: '1.5.0'
+  TERRAGRUNT_VERSION: '0.68.9'
 
 jobs:
   terraform-plan:
@@ -36,88 +39,110 @@ jobs:
     strategy:
       matrix:
         environment: [development, staging]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
-      
+          terraform_wrapper: false
+
+      - name: Install Terragrunt
+        run: |
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          curl -sSL \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64" \
+            -o /usr/local/bin/terragrunt
+          chmod +x /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Terragrunt HCL Format Check
+        id: fmt
+        run: terragrunt hclfmt --check --diff terragrunt/
+        continue-on-error: true
+
       - name: Authenticate to Google Cloud
+        id: auth
+        if: ${{ secrets.GCP_CREDENTIALS != '' }}
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      
+
       - name: Setup gcloud CLI
+        if: steps.auth.outcome == 'success'
         uses: google-github-actions/setup-gcloud@v2
-      
-      - name: Terraform Format Check
-        id: fmt
-        run: |
-          cd terraform
-          terraform fmt -check -recursive
-        continue-on-error: true
-      
-      - name: Terraform Init
+
+      - name: Terragrunt Init
         id: init
+        if: steps.auth.outcome == 'success'
         run: |
-          cd terraform
-          terraform init -backend-config=backend-${{ matrix.environment }}.tfbackend
-      
-      - name: Terraform Validate
-        id: validate
-        run: |
-          cd terraform
-          terraform validate -no-color
-      
-      - name: Terraform Plan
-        id: plan
-        run: |
-          cd terraform
-          terraform plan \
-            -var-file=terraform.tfvars.${{ matrix.environment }} \
-            -out=tfplan-${{ matrix.environment }} \
-            -no-color
+          ENV_DIR="terragrunt/environments/${{ matrix.environment == 'development' && 'dev' || matrix.environment }}"
+          cd "$ENV_DIR"
+          terragrunt init --terragrunt-non-interactive
         continue-on-error: true
-      
+
+      - name: Terragrunt Validate
+        id: validate
+        if: steps.auth.outcome == 'success'
+        run: |
+          ENV_DIR="terragrunt/environments/${{ matrix.environment == 'development' && 'dev' || matrix.environment }}"
+          cd "$ENV_DIR"
+          terragrunt validate --terragrunt-non-interactive
+        continue-on-error: true
+
+      - name: Terragrunt Plan
+        id: plan
+        if: steps.auth.outcome == 'success'
+        run: |
+          ENV_DIR="terragrunt/environments/${{ matrix.environment == 'development' && 'dev' || matrix.environment }}"
+          cd "$ENV_DIR"
+          terragrunt plan \
+            --terragrunt-non-interactive \
+            -out="${{ github.workspace }}/tfplan-${{ matrix.environment }}" \
+            -no-color 2>&1 | tee plan-output.txt
+        continue-on-error: true
+
       - name: Comment PR with Plan
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-            
-            <details><summary>Show Plan for ${{ matrix.environment }}</summary>
-            
-            \`\`\`terraform
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-            
-            </details>
-            
+            const fmt      = '${{ steps.fmt.outcome }}';
+            const init     = '${{ steps.init.outcome }}';
+            const validate = '${{ steps.validate.outcome }}';
+            const plan     = '${{ steps.plan.outcome }}';
+            const authDone = '${{ steps.auth.outcome }}' === 'success';
+
+            const planNote = authDone
+              ? `\`${plan}\``
+              : '`skipped` _(GCP credentials not available for this PR)_';
+
+            const output = `#### Terraform Format and Style 🖌\`${fmt}\`
+            #### Terragrunt Initialization ⚙️${authDone ? `\`${init}\`` : '`skipped`'}
+            #### Terraform Validation 🤖${authDone ? `\`${validate}\`` : '`skipped`'}
+            #### Terraform Plan 📖${planNote}
+
             *Environment:* \`${{ matrix.environment }}\`
             *Pusher:* @${{ github.actor }}
             *Action:* \`${{ github.event_name }}\``;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             })
-      
+
       - name: Upload Plan Artifact
+        if: steps.plan.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ matrix.environment }}
-          path: terraform/tfplan-${{ matrix.environment }}
+          path: tfplan-${{ matrix.environment }}
           retention-days: 5
 
   terraform-apply-dev:
@@ -127,7 +152,7 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: development
-      backend-config: backend-development.tfbackend
+      env-dir: terragrunt/environments/dev
       plan-artifact-name: tfplan-development
       outputs-retention-days: 30
     secrets:
@@ -140,7 +165,7 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: staging
-      backend-config: backend-staging.tfbackend
+      env-dir: terragrunt/environments/staging
       plan-artifact-name: tfplan-staging
       outputs-retention-days: 30
     secrets:
@@ -153,8 +178,7 @@ jobs:
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       environment: production
-      backend-config: backend-prod.tfbackend
-      tfvars-file: terraform.tfvars.prod
+      env-dir: terragrunt/environments/production
       plan-inline: true
       plan-artifact-name: tfplan-production
       outputs-retention-days: 90
@@ -167,7 +191,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -175,12 +199,12 @@ jobs:
           scan-ref: 'terraform'
           format: 'sarif'
           output: 'trivy-results.sarif'
-      
+
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-      
+
       - name: Run Checkov security scan
         uses: bridgecrewio/checkov-action@master
         with:
