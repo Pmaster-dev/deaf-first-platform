@@ -32,6 +32,11 @@ on:
         type: boolean
         default: true
 
+permissions:
+  contents: read
+  actions: read
+  packages: read
+
 jobs:
   npm-audit:
     name: NPM Security Audit
