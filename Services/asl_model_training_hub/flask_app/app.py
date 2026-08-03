@@ -50,7 +50,7 @@ def list_models():
         return jsonify(json.loads(result.stdout))
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to list models: {str(e)}")
-        return jsonify({"status": "error", "message": f"Failed to list models: {str(e)}"}), 500
+        return jsonify({"status": "error", "message": "Failed to list models"}), 500
     except json.JSONDecodeError:
         return jsonify({"status": "error", "message": "Invalid response from Ollama API"}), 500
 
@@ -81,10 +81,10 @@ def start_model():
         return jsonify({"status": "started", "model": model_name})
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to start model {model_name}: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "Failed to start model"}), 500
     except Exception as e:
         logger.error(f"Error in start_model: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "An internal error occurred"}), 500
 
 @app.route('/model/stop', methods=['POST'])
 def stop_model():
@@ -97,7 +97,7 @@ def stop_model():
         return jsonify({"status": "stopped", "model": model_name})
     except Exception as e:
         logger.error(f"Error in stop_model: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "Failed to stop model"}), 500
 
 @app.route('/inference', methods=['POST'])
 def run_inference():
@@ -158,11 +158,11 @@ def run_inference():
         logger.error(f"Inference error: {str(e)}, stdout: {e.stdout}, stderr: {e.stderr}")
         return jsonify({
             "status": "error", 
-            "message": f"Inference failed: {e.stderr}"
+            "message": "Inference failed"
         }), 500
     except Exception as e:
         logger.error(f"Error in run_inference: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "An internal error occurred"}), 500
 
 def run_training_job(task_id, model_name, training_data, params):
     """Training job to be run in a separate thread"""
