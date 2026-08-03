@@ -122,188 +122,44 @@ jobs:
 
   terraform-apply-dev:
     name: Apply to Development
-    runs-on: ubuntu-latest
     needs: terraform-plan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment:
-      name: development
-      url: https://console.cloud.google.com/home/dashboard?project=deaf-first-dev
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-      
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-      
-      - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init -backend-config=backend-development.tfbackend
-      
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-development
-          path: terraform
-      
-      - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve tfplan-development
-      
-      - name: Terraform Output
-        id: output
-        run: |
-          cd terraform
-          terraform output -json > outputs.json
-          cat outputs.json
-      
-      - name: Upload Outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-outputs-development
-          path: terraform/outputs.json
-          retention-days: 30
+    uses: ./.github/workflows/reusable-terraform-deploy.yml
+    with:
+      environment: development
+      backend_config: backend-development.tfbackend
+      plan_artifact_name: tfplan-development
+      outputs_retention_days: 30
+    secrets:
+      gcp-credentials: ${{ secrets.GCP_CREDENTIALS }}
 
   terraform-apply-staging:
     name: Apply to Staging
-    runs-on: ubuntu-latest
     needs: terraform-plan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment:
-      name: staging
-      url: https://console.cloud.google.com/home/dashboard?project=deaf-first-staging
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-      
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS_STAGING }}
-      
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-      
-      - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init -backend-config=backend-staging.tfbackend
-      
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-staging
-          path: terraform
-      
-      - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve tfplan-staging
-      
-      - name: Terraform Output
-        id: output
-        run: |
-          cd terraform
-          terraform output -json > outputs.json
-          cat outputs.json
-      
-      - name: Upload Outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-outputs-staging
-          path: terraform/outputs.json
-          retention-days: 30
+    uses: ./.github/workflows/reusable-terraform-deploy.yml
+    with:
+      environment: staging
+      backend_config: backend-staging.tfbackend
+      plan_artifact_name: tfplan-staging
+      outputs_retention_days: 30
+    secrets:
+      gcp-credentials: ${{ secrets.GCP_CREDENTIALS_STAGING }}
 
   terraform-apply-production:
     name: Apply to Production
-    runs-on: ubuntu-latest
     needs: terraform-apply-staging
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
-    environment:
-      name: production
-      url: https://console.cloud.google.com/home/dashboard?project=deaf-first-production
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-      
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS_PRODUCTION }}
-      
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-      
-      - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init -backend-config=backend-prod.tfbackend
-      
-      - name: Terraform Plan
-        run: |
-          cd terraform
-          terraform plan \
-            -var-file=terraform.tfvars.prod \
-            -out=tfplan-production \
-            -no-color
-      
-      - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve tfplan-production
-      
-      - name: Terraform Output
-        id: output
-        run: |
-          cd terraform
-          terraform output -json > outputs.json
-          cat outputs.json
-      
-      - name: Upload Outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-outputs-production
-          path: terraform/outputs.json
-          retention-days: 90
-      
-      - name: Create Deployment Summary
-        run: |
-          cd terraform
-          echo "## 🎉 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment:** Production" >> $GITHUB_STEP_SUMMARY
-          echo "- **Deployed by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Infrastructure Outputs" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-          cat outputs.json >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+    uses: ./.github/workflows/reusable-terraform-deploy.yml
+    with:
+      environment: production
+      backend_config: backend-prod.tfbackend
+      tfvars_file: terraform.tfvars.prod
+      plan_inline: true
+      plan_artifact_name: tfplan-production
+      outputs_retention_days: 90
+    secrets:
+      gcp-credentials: ${{ secrets.GCP_CREDENTIALS_PRODUCTION }}
 
   security-scan:
     name: Security Scan

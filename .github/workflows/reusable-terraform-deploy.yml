@@ -1,0 +1,150 @@
+name: Reusable Terraform Deploy
+
+# Canonical Terraform apply workflow for one environment.
+# Callers provide the environment name, backend config, plan artifact name,
+# and GCP credentials; this workflow handles the rest.
+#
+# Usage (apply from a previously uploaded plan artifact):
+#   jobs:
+#     apply-dev:
+#       needs: terraform-plan
+#       uses: ./.github/workflows/reusable-terraform-deploy.yml
+#       with:
+#         environment: development
+#         backend-config: backend-development.tfbackend
+#         plan-artifact-name: tfplan-development
+#         outputs-retention-days: 30
+#       secrets:
+#         gcp-credentials: ${{ secrets.GCP_CREDENTIALS }}
+#
+# Usage (inline plan + apply, e.g. production):
+#   jobs:
+#     apply-prod:
+#       uses: ./.github/workflows/reusable-terraform-deploy.yml
+#       with:
+#         environment: production
+#         backend-config: backend-prod.tfbackend
+#         tfvars-file: terraform.tfvars.prod
+#         plan-inline: true
+#         plan-artifact-name: tfplan-production
+#         outputs-retention-days: 90
+#       secrets:
+#         gcp-credentials: ${{ secrets.GCP_CREDENTIALS_PRODUCTION }}
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment name (development | staging | production)'
+        required: true
+        type: string
+      terraform_version:
+        description: 'Terraform version to install'
+        type: string
+        default: '1.5.0'
+      backend_config:
+        description: 'Backend config filename relative to the terraform/ directory (e.g. backend-development.tfbackend)'
+        required: true
+        type: string
+      tfvars_file:
+        description: 'Terraform vars file relative to the terraform/ directory. Required when plan_inline is true.'
+        type: string
+        default: ''
+      plan_inline:
+        description: 'When true, run terraform plan locally before applying instead of downloading an artifact'
+        type: boolean
+        default: false
+      plan_artifact_name:
+        description: 'Name of the tfplan artifact to download (when plan_inline is false) or upload (when plan_inline is true)'
+        required: true
+        type: string
+      upload_outputs:
+        description: 'Upload terraform output as a JSON artifact'
+        type: boolean
+        default: true
+      outputs_retention_days:
+        description: 'Retention period in days for the outputs artifact'
+        type: number
+        default: 30
+    secrets:
+      gcp-credentials:
+        description: 'GCP service account credentials JSON'
+        required: true
+
+jobs:
+  terraform-apply:
+    name: Terraform Apply – ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.gcp-credentials }}
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init -backend-config=${{ inputs.backend_config }}
+
+      # -- Plan-inline path (e.g. production) -----------------------------------
+      - name: Terraform Plan (inline)
+        if: ${{ inputs.plan_inline }}
+        run: |
+          cd terraform
+          terraform plan \
+            -var-file=${{ inputs.tfvars_file }} \
+            -out=${{ inputs.plan_artifact_name }} \
+            -no-color
+
+      # -- Artifact path (dev / staging already planned upstream) ---------------
+      - name: Download Plan Artifact
+        if: ${{ !inputs.plan_inline }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.plan_artifact_name }}
+          path: terraform
+
+      - name: Terraform Apply
+        run: |
+          cd terraform
+          terraform apply -auto-approve ${{ inputs.plan_artifact_name }}
+
+      - name: Terraform Output
+        run: |
+          cd terraform
+          terraform output -json > outputs.json
+
+      - name: Upload Terraform Outputs
+        if: ${{ inputs.upload_outputs }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs-${{ inputs.environment }}
+          path: terraform/outputs.json
+          retention-days: ${{ inputs.outputs_retention_days }}
+
+      - name: Write Deployment Summary
+        run: |
+          echo "## 🚀 Terraform deployment to \`${{ inputs.environment }}\` complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | \`${{ inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Timestamp** | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Infrastructure Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "Terraform outputs are available in the \`terraform-outputs-${{ inputs.environment }}\` artifact." >> $GITHUB_STEP_SUMMARY
