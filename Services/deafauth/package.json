@@ -18,28 +18,28 @@
     "clean": "rm -rf node_modules dist"
   },
   "dependencies": {
-    "express": "^4.21.1",
+    "express": "^5.2.1",
     "cors": "^2.8.5",
-    "helmet": "^8.0.0",
-    "dotenv": "^16.4.5",
+    "helmet": "^8.3.0",
+    "dotenv": "^17.4.2",
     "pg": "^8.13.1",
     "jsonwebtoken": "^9.0.2",
     "bcrypt": "^6.0.0",
-    "@modelcontextprotocol/sdk": "^1.25.2",
-    "zod": "^3.23.8"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
-    "@types/node": "^22.10.2",
-    "@types/pg": "^8.11.10",
+    "@types/node": "^26.1.2",
+    "@types/pg": "^8.20.2",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/bcrypt": "^5.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@types/bcrypt": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.15.0",
-    "eslint": "^9.15.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.9"
+    "eslint": "^10.8.0",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }
