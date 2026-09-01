@@ -211,7 +211,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Download plan artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: tgplan-development
           path: terraform
@@ -287,7 +287,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Download plan artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: tgplan-staging
           path: terraform

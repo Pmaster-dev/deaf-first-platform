@@ -113,7 +113,7 @@ jobs:
       # -- Artifact path (dev / staging already planned upstream) ---------------
       - name: Download Plan Artifact
         if: ${{ !inputs.plan_inline }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.plan_artifact_name }}
           path: terraform
