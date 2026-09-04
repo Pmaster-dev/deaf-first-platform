@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import webhookRoutes from './routes/webhook.routes';
-import incomingWebhookRoutes from './routes/incoming-webhook.routes';
+import webhookRoutes from './routes/webhook.routes.js';
+import incomingWebhookRoutes from './routes/incoming-webhook.routes.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3000;
@@ -17,7 +17,7 @@ app.get('/health', (req, res) => {
         status: 'healthy',
         service: 'Backend API',
         version: '2.0.0',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
 // API endpoints
@@ -31,7 +31,7 @@ app.get('/api/status', (req, res) => {
             fibonrose: 'running',
             accessibility: 'running',
             ai: 'running',
-        }
+        },
     });
 });
 // Webhook routes

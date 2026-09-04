@@ -19,7 +19,7 @@ router.post('/:service', async (req, res) => {
             event: event || 'unknown',
             timestamp: new Date().toISOString(),
             data: req.body,
-            signature
+            signature,
         };
         // Process based on service type
         switch (service) {
@@ -39,7 +39,7 @@ router.post('/:service', async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Webhook received successfully',
-            eventId: webhookEvent.id
+            eventId: webhookEvent.id,
         });
     }
     catch (error) {
@@ -47,7 +47,7 @@ router.post('/:service', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Failed to process webhook',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
         });
     }
 });
@@ -103,7 +103,7 @@ router.get('/health', (req, res) => {
     res.json({
         success: true,
         message: 'Incoming webhook endpoint is healthy',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
 export default router;
