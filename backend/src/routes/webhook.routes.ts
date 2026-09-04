@@ -190,8 +190,26 @@ router.put('/:id', (req: Request, res: Response) => {
     const updates: any = {};
 
     if (name !== undefined) updates.name = name;
-    if (url !== undefined) updates.url = url;
-    if (events !== undefined) updates.events = events;
+    if (url !== undefined) {
+      if (typeof url !== 'string' || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid URL',
+          message: 'URL must start with http:// or https://',
+        });
+      }
+      updates.url = url;
+    }
+    if (events !== undefined) {
+      if (!Array.isArray(events)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid request',
+          message: 'Events must be an array',
+        });
+      }
+      updates.events = events;
+    }
     if (active !== undefined) updates.active = active;
 
     const webhook = webhookService.updateWebhook(getParam(req.params.id), updates);

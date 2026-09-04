@@ -1,4 +1,4 @@
-import { WebhookConfig, WebhookDelivery } from '../types/webhook.types';
+import { WebhookConfig, WebhookDelivery } from '../types/webhook.types.js';
 /**
  * In-memory storage for webhooks (in production, use a database)
  */

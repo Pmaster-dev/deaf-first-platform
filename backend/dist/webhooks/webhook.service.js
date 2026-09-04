@@ -131,11 +131,20 @@ class WebhookService {
         // Normalize signatures to ensure they're in the same format (hex)
         const normalizedSignature = signature.toLowerCase().trim();
         const normalizedExpected = expectedSignature.toLowerCase().trim();
+        const hexPattern = /^[0-9a-f]+$/;
+        if (!hexPattern.test(normalizedSignature) || !hexPattern.test(normalizedExpected)) {
+            return false;
+        }
         // Ensure both signatures have the same length before comparison
         if (normalizedSignature.length !== normalizedExpected.length) {
             return false;
         }
-        return crypto.timingSafeEqual(Buffer.from(normalizedSignature, 'hex'), Buffer.from(normalizedExpected, 'hex'));
+        const signatureBuffer = Buffer.from(normalizedSignature, 'hex');
+        const expectedBuffer = Buffer.from(normalizedExpected, 'hex');
+        if (signatureBuffer.length !== expectedBuffer.length) {
+            return false;
+        }
+        return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
     }
     /**
      * Generate HMAC signature
