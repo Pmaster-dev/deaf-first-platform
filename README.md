@@ -1,6 +1,7 @@
 [![CodeQL](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/github-code-scanning/codeql)
 [![Coverage](https://codecov.io/gh/pinkycollie/deaf-first-platform/branch/main/graph/badge.svg)](https://codecov.io/gh/pinkycollie/deaf-first-platform)
 [![Copilot code review](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer/badge.svg)](https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer)
+[![Semgrep](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/semgrep.yml/badge.svg)](https://github.com/pinkycollie/deaf-first-platform/actions/workflows/semgrep.yml)
 # MBTQ Deaf-First Platform
 
 A comprehensive platform built with deaf-first foundation, providing accessible dao channel service and support, AI-powered assistance, and decentralized governance.
